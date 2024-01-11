@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.prashant.springbootcrud.ExceptionHandeling.BusinessException;
@@ -14,17 +17,17 @@ import com.prashant.springbootcrud.Util.SessionFactoryHelper;
 
 @Service
 public class EmployeeService implements EmployeeServiceInterface {
-
+	public static final Logger log = LoggerFactory.getLogger("Service Logs");
 	@Autowired
 	EmployeeRepository employeeRepository;
 
 	@Override
-	public Employee createEmployee(Employee employee) {
+	public ResponseEntity<Employee> createEmployee(Employee employee) {
 		if (employee.getName().isEmpty() || employee.getName().length() == 0) {
 			throw new BusinessException("600", "No name value provided for the emplyee Name!!");
 		}
 		try {
-			return employeeRepository.save(employee);
+			return ResponseEntity.ok(employeeRepository.save(employee));
 		}
 
 		catch (IllegalArgumentException e) {
@@ -34,26 +37,37 @@ public class EmployeeService implements EmployeeServiceInterface {
 	}
 
 	@Override
-	public void createEmployee(List<Employee> employeeList) {
+	public ResponseEntity<String> createEmployee(List<Employee> employeeList) {
+		try {
+			SessionFactory sessionFactory = SessionFactoryHelper.getSessionFactory();
+			Session session = sessionFactory.openSession();
+			session.beginTransaction();
 
-		SessionFactory sessionFactory = SessionFactoryHelper.getSessionFactory();
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-
-		session.save(employeeList);
-		session.getTransaction().commit();
-		session.close();
-
+			session.save(employeeList);
+			session.getTransaction().commit();
+			session.close();
+			return ResponseEntity.ok("Employee created Successfully!!!");
+		}catch (Exception e){
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@Override
-	public void deleteEmployee() {
-
-		employeeRepository.deleteAll();
+	public ResponseEntity<String> deleteEmployee() {
+		try {
+			employeeRepository.deleteAll();
+			return ResponseEntity.ok("Employee Deleted Successfully!!!");
+		}catch (Exception e){
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@Override
-	public List<Employee> getAllEmployee() {
-		return employeeRepository.findAll();
+	public ResponseEntity<List<Employee>> getAllEmployee() {
+		return ResponseEntity.ok(employeeRepository.findAll());
 	}
 }

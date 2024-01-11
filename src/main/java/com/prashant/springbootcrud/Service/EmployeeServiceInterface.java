@@ -3,15 +3,16 @@ package com.prashant.springbootcrud.Service;
 import java.util.List;
 
 import com.prashant.springbootcrud.Model.Employee;
+import org.springframework.http.ResponseEntity;
 
 public interface EmployeeServiceInterface {
 
-	public Employee createEmployee(Employee employee);
+	public ResponseEntity<Employee> createEmployee(Employee employee);
 
-	public void createEmployee(List<Employee> employeeList);
+	public ResponseEntity<String> createEmployee(List<Employee> employeeList);
 
-	public void deleteEmployee();
+	public ResponseEntity<String> deleteEmployee();
 
-	public List<Employee> getAllEmployee();
+	public ResponseEntity<List<Employee>> getAllEmployee();
 
 }
