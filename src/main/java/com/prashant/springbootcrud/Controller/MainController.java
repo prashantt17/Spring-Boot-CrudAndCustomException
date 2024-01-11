@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.sound.midi.ControllerEventListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,36 +26,53 @@ import com.prashant.springbootcrud.Service.EmployeeServiceInterface;
 @RequestMapping("/rest")
 public class MainController {
 
+
+	public static final Logger log= LoggerFactory.getLogger("Controller logs");
+
 	@Autowired
 	EmployeeServiceInterface employeeServiceInterface;
 
 	@GetMapping("/getAllEmployee")
-	public List<Employee> getAllEmployee() {
-		System.out.println("Inside Employee Repository");
-		return employeeServiceInterface.getAllEmployee();
+	public ResponseEntity<List<Employee>> getAllEmployee() {
+		try {
+			log.info("Inside Employee Repository");
+			return employeeServiceInterface.getAllEmployee();
+		}catch (Exception e){
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@PostMapping("/create")
 	public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
 		try {
-			Employee empCreated = employeeServiceInterface.createEmployee(employee);
-			return new ResponseEntity<Employee>(empCreated, HttpStatus.CREATED);
+			return ResponseEntity.ok(employeeServiceInterface.createEmployee(employee));
 		} catch (BusinessException e) {
 			ControllerException ce = new ControllerException(e.getErrorCode(), e.getErrorMessage());
 			return new ResponseEntity<ControllerException>(ce, HttpStatus.BAD_REQUEST);
 		}
-
 	}
-
 	@PostMapping("/createMultiple")
-	public void createEmployeeList(@RequestBody List<Employee> employeeList) {
-
-		employeeServiceInterface.createEmployee(employeeList);
+	public ResponseEntity<String> createEmployeeList(@RequestBody List<Employee> employeeList) {
+		try {
+			return employeeServiceInterface.createEmployee(employeeList);
+		}catch (Exception e){
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@DeleteMapping("/deleteAll")
-	public void deleteEmployees() {
-		employeeServiceInterface.deleteEmployee();
+	public ResponseEntity<String> deleteEmployees() {
+		try {
+			return employeeServiceInterface.deleteEmployee();
+		}catch (Exception e){
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 }
